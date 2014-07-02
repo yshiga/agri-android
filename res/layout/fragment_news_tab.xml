@@ -4,6 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <View
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+    
     <ListView 
         android:id="@+id/list"
         android:layout_width="match_parent"

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -14,7 +14,32 @@
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="android:actionBarStyle">@style/actionBar</item>
+        <item name="android:actionBarTabStyle">@style/actionBarTab</item>
+    </style>
+
+    <!-- action bar -->
+    <style name="actionBar" 
+		parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+
+        <!-- タイトルバーの背景色 -->
+        <item name="android:background">#ffa500</item>
+        <item name="android:titleTextStyle">@style/titleTextStyle</item>
+
+    </style>
+
+    <style name="actionBarTab" parent="@android:style/Widget.ActionBar.TabView">
+        <item name="android:minWidth">100dp</item>
+        <item name="android:maxWidth">100dp</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="titleTextStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+
+        <!-- タイトルバーの文字色 -->
+        <item name="android:textColor">#ffffff</item>
     </style>
 
 </resources>

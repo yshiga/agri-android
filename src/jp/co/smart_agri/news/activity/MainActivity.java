@@ -9,17 +9,23 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class MainActivity extends FragmentActivity implements
 		ActionBar.TabListener {
 
 	ViewPager mViewPager;
 	PagerAdapter mPagerAdapter;
+
+	private final static int TAB_COLOR_UNSELECTED = Color.WHITE;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,22 +37,8 @@ public class MainActivity extends FragmentActivity implements
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		mPagerAdapter = new NewsTabPagerAdapter(getSupportFragmentManager());
-
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mViewPager.setAdapter(mPagerAdapter);
-		mViewPager
-				.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-					@Override
-					public void onPageSelected(int position) {
-						actionBar.setSelectedNavigationItem(position);
-					}
-				});
-		for (int i = 0; i < mPagerAdapter.getCount(); i++) {
-			actionBar.addTab(actionBar.newTab()
-					.setText(mPagerAdapter.getPageTitle(i))
-					.setTabListener(this));
-		}
+		setupViewPager();
+		setupTab();
 	}
 
 	@Override
@@ -70,6 +62,10 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onTabSelected(Tab tab, android.app.FragmentTransaction ft) {
 		mViewPager.setCurrentItem(tab.getPosition());
+
+		resetTabBackColor();
+		setTabBackColorOnSelected(tab.getPosition());
+
 	}
 
 	@Override
@@ -102,6 +98,59 @@ public class MainActivity extends FragmentActivity implements
 		public CharSequence getPageTitle(int position) {
 			return AppUtils.getTabNameByTabPosi(position);
 		}
+	}
+
+	private void setupViewPager() {
+
+		final ActionBar actionBar = getActionBar();
+		mPagerAdapter = new NewsTabPagerAdapter(getSupportFragmentManager());
+
+		mViewPager = (ViewPager) findViewById(R.id.pager);
+		mViewPager.setAdapter(mPagerAdapter);
+		mViewPager
+				.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+					@Override
+					public void onPageSelected(int position) {
+						actionBar.setSelectedNavigationItem(position);
+					}
+				});
+	}
+
+	private void setupTab() {
+		final ActionBar actionBar = getActionBar();
+		for (int i = 0; i < mPagerAdapter.getCount(); i++) {
+			RelativeLayout view = (RelativeLayout) getLayoutInflater().inflate(
+					R.layout.action_bar_tab_label, null);
+
+			TextView tabTitle = (TextView) view.findViewById(R.id.title);
+
+			tabTitle.setText(mPagerAdapter.getPageTitle(i));
+			view.setBackgroundColor(TAB_COLOR_UNSELECTED);
+
+			actionBar.addTab(actionBar.newTab().setTabListener(this)
+					.setCustomView(view));
+
+		}
+	}
+
+	private void resetTabBackColor() {
+		final ActionBar actionBar = getActionBar();
+		for (int i = 0; i < actionBar.getTabCount(); i++) {
+			ActionBar.Tab tmpTab = actionBar.getTabAt(i);
+			tmpTab.getCustomView().setBackgroundColor(Color.WHITE);
+		}
+	}
+
+	/**
+	 * 指定したポジションのタブの色を選択されている状態のものに変更する
+	 * 
+	 * @param position
+	 */
+	private void setTabBackColorOnSelected(int position) {
+		final ActionBar actionBar = getActionBar();
+		ActionBar.Tab currentTab = actionBar.getTabAt(position);
+		currentTab.getCustomView().setBackgroundColor(
+				AppUtils.getColorByTabPosi(position));
 	}
 
 }

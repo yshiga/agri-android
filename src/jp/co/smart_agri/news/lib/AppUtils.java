@@ -1,5 +1,7 @@
 package jp.co.smart_agri.news.lib;
 
+import android.graphics.Color;
+
 public class AppUtils {
 
 	public static String getTabNameByTabPosi(int position) {
@@ -16,6 +18,22 @@ public class AppUtils {
 			return "self-sustaining/";
 		}
 		return null;
+	}
+
+	public static int getColorByTabPosi(int position) {
+		return getColorByCid(tabPosi2Cid(position));
+	}
+
+	public static int getColorByCid(int cid) {
+		switch (cid) {
+		case 0:
+			return Color.parseColor("#00bfff");
+		case 1:
+			return Color.parseColor("#ff1493");
+		case 2:
+			return Color.parseColor("#8a2be2");
+		}
+		return Color.CYAN;
 	}
 
 	public static int tabPosi2Cid(int position) {

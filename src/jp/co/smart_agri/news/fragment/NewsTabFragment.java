@@ -53,6 +53,10 @@ public class NewsTabFragment extends Fragment {
 		View rootView = inflater.inflate(R.layout.fragment_news_tab, container,
 				false);
 		mAdapter = new NewsListAdapter();
+		
+		View topBar = rootView.findViewById(R.id.top_bar);
+		topBar.setBackgroundColor(AppUtils.getColorByCid(getNewsCaterogyId()));
+		
 		mNewsList = new NewsList();
 		ListView listView = (ListView) rootView.findViewById(R.id.list);
 		listView.setAdapter(mAdapter);
