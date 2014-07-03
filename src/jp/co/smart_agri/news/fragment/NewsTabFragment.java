@@ -80,6 +80,8 @@ public class NewsTabFragment extends Fragment {
 				startNewsWebViewActivity(news);
 			}
 		});
+		getNews();
+		
 		return rootView;
 	}
 
@@ -95,6 +97,9 @@ public class NewsTabFragment extends Fragment {
 	public void onResume() {
 		super.onResume();
 
+	};
+
+	private void getNews() {
 		// TODO fragment内で通信するのはよくないが、一旦これで実装
 		JsonArrayRequest req = new JsonArrayRequest(AppConst.API_BASE_URL
 				+ AppUtils.getApiPathByCid(getNewsCaterogyId()),
@@ -112,11 +117,9 @@ public class NewsTabFragment extends Fragment {
 					}
 				});
 
-		// add the request object to the queue to be executed
 		MyApplication.getInstance().addToRequestQueue(req);
 		mLoadingCircle.setVisibility(View.VISIBLE);
-
-	};
+	}
 
 	@Override
 	public void onPause() {
