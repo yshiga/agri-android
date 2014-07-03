@@ -27,12 +27,13 @@ public class AppUtils {
 	public static int getColorByCid(int cid) {
 		switch (cid) {
 		case 0:
-			return Color.parseColor("#00bfff");
+			return Color.parseColor("#409ECA");
 		case 1:
-			return Color.parseColor("#ff1493");
+			return Color.parseColor("#F0B02F");
 		case 2:
-			return Color.parseColor("#8a2be2");
+			return Color.parseColor("#7B5A3B");
 		}
+		// Color.parseColor("#794FAC") //紫
 		return Color.CYAN;
 	}
 

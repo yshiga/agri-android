@@ -33,7 +33,7 @@ public class MainActivity extends FragmentActivity implements
 	ViewPager mViewPager;
 	PagerAdapter mPagerAdapter;
 
-	private final static int TAB_COLOR_UNSELECTED = Color.WHITE;
+	private final static int TAB_COLOR_UNSELECTED = Color.parseColor("#F0F0EE");
 	
 	private void setupParsePush(){
 		Parse.initialize(this, AppConst.PARSE_APP_ID, AppConst.PARSE_CLIENT_KEY);
@@ -84,10 +84,9 @@ public class MainActivity extends FragmentActivity implements
 	@Override
 	public void onTabSelected(Tab tab, android.app.FragmentTransaction ft) {
 		mViewPager.setCurrentItem(tab.getPosition());
+		resetTabStyle();
+		setTabStyleOnSelected(tab.getPosition());
 
-		resetTabBackColor();
-		setTabBackColorOnSelected(tab.getPosition());
-		
 		MyFlurry.logEventSwitchTab(AppUtils.tabPosi2Cid(tab.getPosition()));
 	}
 
@@ -148,6 +147,7 @@ public class MainActivity extends FragmentActivity implements
 			TextView tabTitle = (TextView) view.findViewById(R.id.title);
 
 			tabTitle.setText(mPagerAdapter.getPageTitle(i));
+			tabTitle.setTextColor(AppUtils.getColorByTabPosi(i));
 			view.setBackgroundColor(TAB_COLOR_UNSELECTED);
 
 			actionBar.addTab(actionBar.newTab().setTabListener(this)
@@ -156,11 +156,13 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	private void resetTabBackColor() {
+	private void resetTabStyle() {
 		final ActionBar actionBar = getActionBar();
 		for (int i = 0; i < actionBar.getTabCount(); i++) {
 			ActionBar.Tab tmpTab = actionBar.getTabAt(i);
-			tmpTab.getCustomView().setBackgroundColor(Color.WHITE);
+			tmpTab.getCustomView().setBackgroundColor(TAB_COLOR_UNSELECTED);
+			TextView title = (TextView)tmpTab.getCustomView().findViewById(R.id.title);
+			title.setTextColor(AppUtils.getColorByTabPosi(i));
 		}
 	}
 
@@ -169,11 +171,13 @@ public class MainActivity extends FragmentActivity implements
 	 * 
 	 * @param position
 	 */
-	private void setTabBackColorOnSelected(int position) {
+	private void setTabStyleOnSelected(int position) {
 		final ActionBar actionBar = getActionBar();
 		ActionBar.Tab currentTab = actionBar.getTabAt(position);
 		currentTab.getCustomView().setBackgroundColor(
 				AppUtils.getColorByTabPosi(position));
+		TextView title = (TextView)currentTab.getCustomView().findViewById(R.id.title);
+		title.setTextColor(Color.WHITE);
 	}
 
 }

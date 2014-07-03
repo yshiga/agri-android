@@ -27,6 +27,7 @@ public class NewsWebViewActivity extends BaseActivity {
 	private void setupWebView() {
 		WebView webView = (WebView) findViewById(R.id.webView);
 		webView.getSettings().setJavaScriptEnabled(true);
+		webView.getSettings().setBuiltInZoomControls(true);
 		webView.setWebChromeClient(new WebChromeClient() {
 			public void onProgressChanged(WebView view, int progress) {
 				mProgressBar.setProgress(progress);

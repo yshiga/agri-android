@@ -19,13 +19,11 @@
     </style>
 
     <!-- action bar -->
-    <style name="actionBar" 
-		parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    <style name="actionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
 
         <!-- タイトルバーの背景色 -->
-        <item name="android:background">#ffa500</item>
+        <item name="android:background">#5EC383</item>
         <item name="android:titleTextStyle">@style/titleTextStyle</item>
-
     </style>
 
     <style name="actionBarTab" parent="@android:style/Widget.ActionBar.TabView">
