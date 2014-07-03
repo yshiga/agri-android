@@ -50,9 +50,9 @@ public class MyFlurry {
 		FlurryAgent.logEvent(EVENT_VIEW_ARTICLE, param);
 	}
 
-	public static void logEventSwitchTab(String tabId) {
+	public static void logEventSwitchTab(int tabId) {
 		HashMap<String, String> param = new HashMap<String, String>();
-		param.put("tab_id", tabId);
+		param.put("tab_id", String.valueOf(tabId));
 
 		FlurryAgent.logEvent(EVENT_SWITCH_TAB, param);
 	}

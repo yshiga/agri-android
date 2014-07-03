@@ -13,6 +13,7 @@ import jp.co.smart_agri.news.activity.NewsWebViewActivity;
 import jp.co.smart_agri.news.application.MyApplication;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.lib.AppUtils;
+import jp.co.smart_agri.news.lib.MyFlurry;
 import jp.co.smart_agri.news.lib.MyImageCache;
 import jp.co.smart_agri.news.object.News;
 import jp.co.smart_agri.news.object.NewsList;
@@ -66,7 +67,10 @@ public class NewsTabFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
+				
 				News news = mNewsList.get(position);
+				MyFlurry.logEventViewArticle(news.getId());
+
 				startNewsWebViewActivity(news);
 			}
 		});
