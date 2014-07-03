@@ -6,4 +6,7 @@ public class AppConst {
 	
 	public final static String PARSE_APP_ID = "8TfRHDS20S6C57VHC6Nf1tHJmbzJBP5JLNJ5thRY";
 	public final static String PARSE_CLIENT_KEY = "WuIVNEOAZZ2a3ETWFdmUH1RuewpYFbBR05t6XScn";
+	
+	public final static String CRITTERCISM_KEY = "7VzoJBeEzRfYT3mvS7ZYx359avJTt94R";
+	
 }

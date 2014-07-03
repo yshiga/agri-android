@@ -1,5 +1,6 @@
 package jp.co.smart_agri.news.activity;
 
+import com.crittercism.app.Crittercism;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
 import com.parse.ParseInstallation;
@@ -39,6 +40,10 @@ public class MainActivity extends FragmentActivity implements
 		ParseInstallation.getCurrentInstallation().saveInBackground();
 		ParseAnalytics.trackAppOpened(getIntent());
 	}
+	
+	private void setupCrittercism(){
+		Crittercism.initialize(getApplicationContext(), AppConst.CRITTERCISM_KEY);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +51,7 @@ public class MainActivity extends FragmentActivity implements
 		setContentView(R.layout.activity_main);
 		
 		setupParsePush();
+		setupCrittercism();
 
 		setTitle(getResources().getString(R.string.app_name));
 
