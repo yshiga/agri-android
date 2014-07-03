@@ -29,6 +29,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class NewsTabFragment extends Fragment {
@@ -48,16 +49,21 @@ public class NewsTabFragment extends Fragment {
 
 	NewsListAdapter mAdapter;
 
+	private ProgressBar mLoadingCircle;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_news_tab, container,
 				false);
 		mAdapter = new NewsListAdapter();
-		
+
+		mLoadingCircle = (ProgressBar) rootView
+				.findViewById(R.id.progress_circle);
+
 		View topBar = rootView.findViewById(R.id.top_bar);
 		topBar.setBackgroundColor(AppUtils.getColorByCid(getNewsCaterogyId()));
-		
+
 		mNewsList = new NewsList();
 		ListView listView = (ListView) rootView.findViewById(R.id.list);
 		listView.setAdapter(mAdapter);
@@ -67,7 +73,7 @@ public class NewsTabFragment extends Fragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				
+
 				News news = mNewsList.get(position);
 				MyFlurry.logEventViewArticle(news.getId());
 
@@ -85,7 +91,6 @@ public class NewsTabFragment extends Fragment {
 		startActivity(i);
 	}
 
-
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -98,15 +103,18 @@ public class NewsTabFragment extends Fragment {
 					public void onResponse(JSONArray response) {
 						mNewsList.convertFromJsonArray(response);
 						mAdapter.notifyDataSetChanged();
+						mLoadingCircle.setVisibility(View.GONE);
 					}
 				}, new Response.ErrorListener() {
 					@Override
 					public void onErrorResponse(VolleyError error) {
+						mLoadingCircle.setVisibility(View.GONE);
 					}
 				});
 
 		// add the request object to the queue to be executed
 		MyApplication.getInstance().addToRequestQueue(req);
+		mLoadingCircle.setVisibility(View.VISIBLE);
 
 	};
 

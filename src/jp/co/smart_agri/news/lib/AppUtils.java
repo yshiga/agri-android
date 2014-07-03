@@ -15,7 +15,7 @@ public class AppUtils {
 		case 1:
 			return "agriculture/";
 		case 2:
-			return "self-sustaining/";
+			return "kitchengarden/";
 		}
 		return null;
 	}
