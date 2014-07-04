@@ -16,8 +16,12 @@ public class AppUtils {
 			return "agriculture/";
 		case 2:
 			return "kitchengarden/";
+		case 3:
+			return "event/";
+		case 4:
+			return "house/";
 		}
-		return null;
+		return "";
 	}
 
 	public static int getColorByTabPosi(int position) {
@@ -32,9 +36,12 @@ public class AppUtils {
 			return Color.parseColor("#F0B02F");
 		case 2:
 			return Color.parseColor("#7B5A3B");
+		case 3:
+			return Color.parseColor("#794FAC"); // 紫
+		case 4:
+			return Color.parseColor("#ff1493"); 
 		}
-		// Color.parseColor("#794FAC") //紫
-		return Color.CYAN;
+		return Color.parseColor("#ff1493"); 
 	}
 
 	public static int tabPosi2Cid(int position) {
@@ -43,7 +50,7 @@ public class AppUtils {
 	}
 
 	public static int getTabCount() {
-		return 3;
+		return 5;
 	}
 
 	private static String getTabNameByCid(int cid) {
@@ -54,8 +61,13 @@ public class AppUtils {
 			return "農業";
 		case 2:
 			return "家庭菜園";
+		case 3:
+			return "イベント";
+		case 4:
+			return "物件";
+
 		}
-		return null;
+		return "エラー";
 	}
 
 }

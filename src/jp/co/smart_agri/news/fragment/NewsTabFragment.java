@@ -81,7 +81,7 @@ public class NewsTabFragment extends Fragment {
 			}
 		});
 		getNews();
-		
+
 		return rootView;
 	}
 
@@ -171,6 +171,7 @@ public class NewsTabFragment extends Fragment {
 			View rootView = inflater.inflate(R.layout.list_news, parent, false);
 
 			setTitle(rootView, news);
+			setSrc(rootView, news);
 			setThumnailView(rootView, news);
 
 			return rootView;
@@ -179,6 +180,17 @@ public class NewsTabFragment extends Fragment {
 		private void setTitle(View rootView, News news) {
 			TextView title = (TextView) rootView.findViewById(R.id.title);
 			title.setText(news.getTitle());
+		}
+
+		private void setSrc(View rootView, News news) {
+			TextView src = (TextView) rootView.findViewById(R.id.src);
+			if (news.hasSrc()) {
+				src.setVisibility(View.GONE);
+				return;
+			}
+			
+			src.setVisibility(View.VISIBLE);
+			src.setText(news.getSrc());
 		}
 
 		private void setThumnailView(View rootView, News news) {

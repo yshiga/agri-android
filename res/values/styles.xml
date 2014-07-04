@@ -16,6 +16,7 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <item name="android:actionBarStyle">@style/actionBar</item>
         <item name="android:actionBarTabStyle">@style/actionBarTab</item>
+        <item name="android:actionBarTabBarStyle">@style/customTabBar</item>
     </style>
 
     <!-- action bar -->
@@ -32,6 +33,11 @@
         <item name="android:padding">0dp</item>
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="customTabBar" parent="@android:style/Widget.Holo.ActionBar.TabBar">
+        <item name="android:showDividers">middle</item>
+         <item name="android:divider">@drawable/action_bar_tab_divider</item>
     </style>
 
     <style name="titleTextStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">

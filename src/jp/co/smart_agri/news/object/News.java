@@ -33,6 +33,14 @@ public class News {
 	public String getSrc() {
 		return mSrc;
 	}
+
+	public boolean hasSrc(){
+		if(TextUtils.isEmpty(mSrc)){
+			return false;
+		}
+		return true;
+	}
+	
 	
 	public boolean hasImage(){
 		if(TextUtils.isEmpty(mImageUrl)){

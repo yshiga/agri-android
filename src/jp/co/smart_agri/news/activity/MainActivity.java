@@ -1,5 +1,7 @@
 package jp.co.smart_agri.news.activity;
 
+import java.util.Set;
+
 import com.crittercism.app.Crittercism;
 import com.parse.Parse;
 import com.parse.ParseAnalytics;
@@ -11,6 +13,7 @@ import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.fragment.NewsTabFragment;
 import jp.co.smart_agri.news.lib.AppUtils;
 import jp.co.smart_agri.news.lib.MyFlurry;
+import jp.co.smart_agri.news.lib.MyParse;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -34,14 +37,7 @@ public class MainActivity extends FragmentActivity implements
 	PagerAdapter mPagerAdapter;
 
 	private final static int TAB_COLOR_UNSELECTED = Color.parseColor("#F0F0EE");
-	
-	private void setupParsePush(){
-		Parse.initialize(this, AppConst.PARSE_APP_ID, AppConst.PARSE_CLIENT_KEY);
-		PushService.setDefaultPushCallback(this, MainActivity.class);
-		ParseInstallation.getCurrentInstallation().saveInBackground();
-		ParseAnalytics.trackAppOpened(getIntent());
-	}
-	
+
 	private void setupCrittercism(){
 		Crittercism.initialize(getApplicationContext(), AppConst.CRITTERCISM_KEY);
 	}
@@ -51,7 +47,7 @@ public class MainActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		setupParsePush();
+		MyParse.setupParsePush(getApplicationContext(), getIntent());
 		setupCrittercism();
 
 		setTitle(getResources().getString(R.string.app_name));
