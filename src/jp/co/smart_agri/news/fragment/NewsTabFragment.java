@@ -184,13 +184,13 @@ public class NewsTabFragment extends Fragment {
 
 		private void setSrc(View rootView, News news) {
 			TextView src = (TextView) rootView.findViewById(R.id.src);
-			if (news.hasSrc()) {
+			if (!news.hasVia()) {
 				src.setVisibility(View.GONE);
 				return;
 			}
 			
 			src.setVisibility(View.VISIBLE);
-			src.setText(news.getSrc());
+			src.setText(news.getVia());
 		}
 
 		private void setThumnailView(View rootView, News news) {

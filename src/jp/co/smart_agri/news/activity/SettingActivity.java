@@ -1,10 +1,5 @@
 package jp.co.smart_agri.news.activity;
 
-import java.util.Iterator;
-import java.util.Set;
-
-import com.parse.PushService;
-
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.activity.base.BaseActivity;
 import jp.co.smart_agri.news.lib.MyParse;

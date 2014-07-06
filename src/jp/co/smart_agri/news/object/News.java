@@ -12,7 +12,7 @@ public class News {
 	private String mTitle;
 	private String mUrl;
 	private String mImageUrl;
-	private String mSrc;
+	private String mVia;
 	
 	public String getId(){
 		return mId;
@@ -30,12 +30,12 @@ public class News {
 		return mImageUrl;
 	}
 	
-	public String getSrc() {
-		return mSrc;
+	public String getVia() {
+		return mVia;
 	}
 
-	public boolean hasSrc(){
-		if(TextUtils.isEmpty(mSrc)){
+	public boolean hasVia(){
+		if(TextUtils.isEmpty(mVia)){
 			return false;
 		}
 		return true;
@@ -60,7 +60,7 @@ public class News {
 			mTitle = obj.getString("title");
 			Log.i("tag", "image class:" + obj.get("image_url").getClass());
 			mImageUrl = obj.getString("image_url");
-			mSrc = obj.getString("src");
+			mVia = obj.getString("via");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
