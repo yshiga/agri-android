@@ -75,7 +75,7 @@ public class NewsTabFragment extends Fragment {
 					int position, long id) {
 
 				News news = mNewsList.get(position);
-				MyFlurry.logEventViewArticle(news.getId());
+				MyFlurry.logEventViewArticle(news.getId(), getNewsCaterogyId());
 
 				startNewsWebViewActivity(news);
 			}

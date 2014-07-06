@@ -43,16 +43,17 @@ public class MyFlurry {
 		FlurryAgent.logEvent(EVENT_LAUNCH_APP, param);
 	}
 
-	public static void logEventViewArticle(String articleId) {
+	public static void logEventViewArticle(String articleId, int categoryId) {
 		HashMap<String, String> param = new HashMap<String, String>();
 		param.put("id", articleId);
+		param.put("category_id", String.valueOf(categoryId));
 
 		FlurryAgent.logEvent(EVENT_VIEW_ARTICLE, param);
 	}
 
-	public static void logEventSwitchTab(int tabId) {
+	public static void logEventSwitchTab(int categoryId) {
 		HashMap<String, String> param = new HashMap<String, String>();
-		param.put("tab_id", String.valueOf(tabId));
+		param.put("caterogy_id", String.valueOf(categoryId));
 
 		FlurryAgent.logEvent(EVENT_SWITCH_TAB, param);
 	}
