@@ -1,12 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="100dp"
-    android:minHeight="100dp"
+    android:layout_height="wrap_content"
+    android:minHeight="60dp"
     android:orientation="horizontal" >
 
+    <!-- 左カラム -->
+    <!-- 右カラムの高さを超えないように -->
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
         android:paddingBottom="10dp"
@@ -19,7 +21,8 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:lines="2"
+            android:maxLines="3"
+            android:textSize="14dp"
             android:text="ニュースタイトル" />
 
         <TextView
@@ -30,11 +33,14 @@
             android:lines="1"
             android:text="ニュース元" />
     </LinearLayout>
+    <!-- /左カラム -->
 
+    <!-- 右カラム -->
     <ImageView
         android:id="@+id/thumnail"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:scaleType="centerCrop" />
+    <!-- /右カラム -->
 
 </LinearLayout>
