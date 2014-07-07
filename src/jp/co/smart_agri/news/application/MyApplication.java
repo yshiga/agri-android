@@ -1,5 +1,6 @@
 package jp.co.smart_agri.news.application;
 
+import jp.co.smart_agri.news.lib.MyParse;
 import android.app.Application;
 import android.text.TextUtils;
 
@@ -31,6 +32,7 @@ public class MyApplication extends Application {
 
         // initialize the singleton
         sInstance = this;
+		MyParse.setupParsePush(getApplicationContext());
     }
 
     /**

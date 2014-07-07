@@ -36,24 +36,18 @@ public class MyParse {
 		}
 	}
 
-	/**
-	 * 毎回起動するActivityで実行する
-	 * @param context
-	 * @param intent
-	 */
-	public static void setupParsePush(Context context, Intent intent) {
+	public static void setupParsePush(Context context) {
 		Parse.initialize(context, AppConst.PARSE_APP_ID,
 				AppConst.PARSE_CLIENT_KEY);
 
+		PushService.subscribe(context, CHANNEL_ALL, DEF_LAUNCH_ACTIVITY);
 		// 初回起動なら、チャンネルを設定
 		if (isFirstLaunch(context)) {
-			PushService.subscribe(context, CHANNEL_ALL, DEF_LAUNCH_ACTIVITY);
 			subscribeMorning(context);
 		}
 
 		PushService.setDefaultPushCallback(context, DEF_LAUNCH_ACTIVITY);
 		ParseInstallation.getCurrentInstallation().saveInBackground();
-		ParseAnalytics.trackAppOpened(intent);
 	}
 	
 	public static void setSubscribeMorning(Context context, boolean isSubscribe) {

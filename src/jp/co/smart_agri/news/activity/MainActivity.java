@@ -47,7 +47,6 @@ public class MainActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		MyParse.setupParsePush(getApplicationContext(), getIntent());
 		setupCrittercism();
 
 		setTitle(getResources().getString(R.string.app_name));
