@@ -3,6 +3,7 @@ package jp.co.smart_agri.news.activity;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebChromeClient;
@@ -18,6 +19,7 @@ public class NewsWebViewActivity extends BaseActivity {
 	public final static String EXTRAS_NEWS_TITLE_KEY = "extras_title_url";
 
 	private MyLoadingProgressBar mProgressBar;
+	private	WebView mWebView;
 
 	private void setupActionBar() {
 		final ActionBar actionBar = getActionBar();
@@ -25,21 +27,21 @@ public class NewsWebViewActivity extends BaseActivity {
 	}
 
 	private void setupWebView() {
-		WebView webView = (WebView) findViewById(R.id.webView);
-		webView.getSettings().setJavaScriptEnabled(true);
-		webView.getSettings().setBuiltInZoomControls(true);
-		webView.setWebChromeClient(new WebChromeClient() {
+		mWebView = (WebView) findViewById(R.id.webView);
+		mWebView.getSettings().setJavaScriptEnabled(true);
+		mWebView.getSettings().setBuiltInZoomControls(true);
+		mWebView.setWebChromeClient(new WebChromeClient() {
 			public void onProgressChanged(WebView view, int progress) {
 				mProgressBar.setProgress(progress);
 			}
 		});
-		webView.setWebViewClient(new WebViewClient() {
+		mWebView.setWebViewClient(new WebViewClient() {
 			public void onReceivedError(WebView view, int errorCode,
 					String description, String failingUrl) {
 			}
 		});
 
-		webView.loadUrl(getNewsUrlFromIntent());
+		mWebView.loadUrl(getNewsUrlFromIntent());
 	}
 
 	@Override
@@ -71,6 +73,16 @@ public class NewsWebViewActivity extends BaseActivity {
 			break;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if (keyCode == KeyEvent.KEYCODE_BACK && mWebView.canGoBack()) {
+	        mWebView.goBack();
+	        return true;
+	    }
+
+	    return super.onKeyDown(keyCode, event);
 	}
 
 	private String getNewsUrlFromIntent() {
