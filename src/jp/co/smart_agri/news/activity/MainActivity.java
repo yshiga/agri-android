@@ -1,19 +1,13 @@
 package jp.co.smart_agri.news.activity;
 
-import java.util.Set;
-
 import com.crittercism.app.Crittercism;
-import com.parse.Parse;
-import com.parse.ParseAnalytics;
-import com.parse.ParseInstallation;
-import com.parse.PushService;
 
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.fragment.NewsTabFragment;
 import jp.co.smart_agri.news.lib.AppUtils;
+import jp.co.smart_agri.news.lib.BackBtnFinishConfirmer;
 import jp.co.smart_agri.news.lib.MyFlurry;
-import jp.co.smart_agri.news.lib.MyParse;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -22,31 +16,35 @@ import android.app.ActionBar.Tab;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity implements
 		ActionBar.TabListener {
 
 	ViewPager mViewPager;
 	PagerAdapter mPagerAdapter;
+	BackBtnFinishConfirmer mBackBtnFinishConfirmer = new BackBtnFinishConfirmer();
 
 	private final static int TAB_COLOR_UNSELECTED = Color.parseColor("#F0F0EE");
 
-	private void setupCrittercism(){
-		Crittercism.initialize(getApplicationContext(), AppConst.CRITTERCISM_KEY);
+	private void setupCrittercism() {
+		Crittercism.initialize(getApplicationContext(),
+				AppConst.CRITTERCISM_KEY);
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		setupCrittercism();
 
 		setTitle(getResources().getString(R.string.app_name));
@@ -56,6 +54,27 @@ public class MainActivity extends FragmentActivity implements
 
 		setupViewPager();
 		setupTab();
+
+	}
+
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+
+		// Backボタン検知
+		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+			if (mBackBtnFinishConfirmer.canFinishOnBackPressed()) {
+				// pressed=trueの時、通常のBackボタンで終了処理.
+				return super.dispatchKeyEvent(event);
+			} else {
+				Toast.makeText(this, "終了する場合は、もう一度バックボタンを押してください",
+						Toast.LENGTH_SHORT).show();
+				return false;
+			}
+
+		}
+		// Backボタンに関わらないボタンが押された場合は、通常処理.
+		return super.dispatchKeyEvent(event);
 	}
 
 	@Override
@@ -156,7 +175,8 @@ public class MainActivity extends FragmentActivity implements
 		for (int i = 0; i < actionBar.getTabCount(); i++) {
 			ActionBar.Tab tmpTab = actionBar.getTabAt(i);
 			tmpTab.getCustomView().setBackgroundColor(TAB_COLOR_UNSELECTED);
-			TextView title = (TextView)tmpTab.getCustomView().findViewById(R.id.title);
+			TextView title = (TextView) tmpTab.getCustomView().findViewById(
+					R.id.title);
 			title.setTextColor(AppUtils.getColorByTabPosi(i));
 		}
 	}
@@ -171,7 +191,8 @@ public class MainActivity extends FragmentActivity implements
 		ActionBar.Tab currentTab = actionBar.getTabAt(position);
 		currentTab.getCustomView().setBackgroundColor(
 				AppUtils.getColorByTabPosi(position));
-		TextView title = (TextView)currentTab.getCustomView().findViewById(R.id.title);
+		TextView title = (TextView) currentTab.getCustomView().findViewById(
+				R.id.title);
 		title.setTextColor(Color.WHITE);
 	}
 
