@@ -24,7 +24,7 @@ public class MyParse {
 
 	public static final Class<? extends Activity> DEF_LAUNCH_ACTIVITY = MainActivity.class;
 
-	public static boolean isFirstLaunch(Context context) {
+	public static boolean isSubscribeNoChannel(Context context) {
 		Set<String> chanels = PushService.getSubscriptions(context);
 
 		// 初回起動時
@@ -40,12 +40,13 @@ public class MyParse {
 		Parse.initialize(context, AppConst.PARSE_APP_ID,
 				AppConst.PARSE_CLIENT_KEY);
 
-		PushService.subscribe(context, CHANNEL_ALL, DEF_LAUNCH_ACTIVITY);
-		// 初回起動なら、チャンネルを設定
-		if (isFirstLaunch(context)) {
+		// チャンネルが0 = 初回起動なので、朝PUSHのチャンネルを設定
+		if (isSubscribeNoChannel(context)) {
 			subscribeMorning(context);
 		}
 
+		// 全員向けのpushのチャンネルを設定
+		PushService.subscribe(context, CHANNEL_ALL, DEF_LAUNCH_ACTIVITY);
 		PushService.setDefaultPushCallback(context, DEF_LAUNCH_ACTIVITY);
 		ParseInstallation.getCurrentInstallation().saveInBackground();
 	}
