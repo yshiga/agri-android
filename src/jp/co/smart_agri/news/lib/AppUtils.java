@@ -13,12 +13,14 @@ public class AppUtils {
 		case 0:
 			return "top/";
 		case 1:
-			return "agriculture/";
-		case 2:
 			return "kitchengarden/";
+		case 2:
+			return "bee/";
 		case 3:
-			return "event/";
+			return "agriculture/";
 		case 4:
+			return "event/";
+		case 5:
 			return "house/";
 		}
 		return "";
@@ -29,7 +31,8 @@ public class AppUtils {
 	}
 
 	public static int getColorByCid(int cid) {
-		switch (cid) {
+		
+		switch (cid % 4) {
 		case 0:
 			return Color.parseColor("#409ECA");
 		case 1:
@@ -50,7 +53,7 @@ public class AppUtils {
 	}
 
 	public static int getTabCount() {
-		return 5;
+		return 6;
 	}
 
 	private static String getTabNameByCid(int cid) {
@@ -58,12 +61,14 @@ public class AppUtils {
 		case 0:
 			return "トップ";
 		case 1:
-			return "農業";
-		case 2:
 			return "家庭菜園";
+		case 2:
+			return "ミツバチ";
 		case 3:
-			return "イベント";
+			return "農業";
 		case 4:
+			return "イベント";
+		case 5:
 			return "物件";
 
 		}
