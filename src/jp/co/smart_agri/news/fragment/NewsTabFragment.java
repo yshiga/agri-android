@@ -167,8 +167,14 @@ public class NewsTabFragment extends Fragment {
 			News news = (News) getItem(position);
 
 			LayoutInflater inflater = (LayoutInflater) getActivity()
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View rootView = inflater.inflate(R.layout.list_news, parent, false);
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);			
+			View rootView;
+			if(position == 0 && news.hasImage()) {
+				rootView = inflater.inflate(R.layout.list_top_news, parent, false);
+			} else {
+				rootView = inflater.inflate(R.layout.list_news, parent, false);
+			}
+
 
 			setTitle(rootView, news);
 			setSrc(rootView, news);
