@@ -15,6 +15,7 @@ import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.lib.AppUtils;
 import jp.co.smart_agri.news.lib.MyFlurry;
 import jp.co.smart_agri.news.lib.MyImageCache;
+import jp.co.smart_agri.news.lib.MyImageLoader;
 import jp.co.smart_agri.news.object.News;
 import jp.co.smart_agri.news.object.NewsList;
 import android.content.Context;
@@ -139,11 +140,8 @@ public class NewsTabFragment extends Fragment {
 
 	private class NewsListAdapter extends BaseAdapter {
 
-		private ImageLoader mImageLoader;
-
 		public NewsListAdapter() {
-			mImageLoader = new ImageLoader(MyApplication.getInstance()
-					.getRequestQueue(), new MyImageCache());
+
 		}
 
 		@Override
@@ -163,51 +161,88 @@ public class NewsTabFragment extends Fragment {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-
 			News news = (News) getItem(position);
+			NewsListRowViewBuilderBase listRowViewBuilder = new NormalListRowViewBilder(R.layout.list_news, parent); 
+			return listRowViewBuilder.getView(news);
+		}
+	}
 
-			LayoutInflater inflater = (LayoutInflater) getActivity()
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View rootView = inflater.inflate(R.layout.list_news, parent, false);
+	class NormalListRowViewBilder extends NewsListRowViewBuilderBase {
 
-			setTitle(rootView, news);
-			setSrc(rootView, news);
-			setThumnailView(rootView, news);
-
-			return rootView;
+		public NormalListRowViewBilder(int layoutId, ViewGroup parent) {
+			super(layoutId, parent);
 		}
 
-		private void setTitle(View rootView, News news) {
-			TextView title = (TextView) rootView.findViewById(R.id.title);
-			title.setText(news.getTitle());
+		@Override
+		public void setTitle(News news) {
+			mTitleView.setText(news.getTitle());
 		}
 
-		private void setSrc(View rootView, News news) {
-			TextView src = (TextView) rootView.findViewById(R.id.src);
+		@Override
+		public void setSrc(News news) {
 			if (!news.hasVia()) {
-				src.setVisibility(View.GONE);
+				mSrcView.setVisibility(View.GONE);
 				return;
 			}
-			
-			src.setVisibility(View.VISIBLE);
-			src.setText(news.getVia());
+			mSrcView.setVisibility(View.VISIBLE);
+			mSrcView.setText(news.getVia());
 		}
 
-		private void setThumnailView(View rootView, News news) {
-
-			ImageView thumnail = (ImageView) rootView
-					.findViewById(R.id.thumnail);
+		@Override
+		public void setThumnailView(News news) {
 
 			if (!news.hasImage()) {
-				thumnail.setVisibility(View.GONE);
+				mThumnailView.setVisibility(View.GONE);
+				mThumnailProgressBar.setVisibility(View.GONE);
 				return;
 			}
 
-			thumnail.setVisibility(View.VISIBLE);
-			ImageListener listener = ImageLoader.getImageListener(thumnail,
-					android.R.drawable.spinner_background,
-					android.R.drawable.ic_dialog_alert);
+			mThumnailView.setVisibility(View.VISIBLE);
+			mThumnailProgressBar.setVisibility(View.VISIBLE);
+
+			ImageListener listener = MyImageLoader.getImageListener(mThumnailView, 
+					mThumnailProgressBar);
 			mImageLoader.get(news.getImageUrl(), listener);
 		}
+	}
+
+	/**
+	 * newsのViewを生成する共通クラス
+	 * @author shigayuuichi
+	 */
+	abstract class NewsListRowViewBuilderBase {
+
+		View mRootView;
+		ImageLoader mImageLoader = new ImageLoader(MyApplication
+				.getInstance().getRequestQueue(), new MyImageCache());
+		TextView mTitleView;
+		TextView mSrcView;
+		ImageView mThumnailView;
+		ProgressBar mThumnailProgressBar;
+		
+		public NewsListRowViewBuilderBase(int layoutId, ViewGroup parent) {
+			LayoutInflater inflater = (LayoutInflater) getActivity()
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			mRootView = inflater.inflate(R.layout.list_news, parent, false);
+			mTitleView = (TextView) mRootView.findViewById(R.id.title);
+			mSrcView = (TextView) mRootView.findViewById(R.id.src);
+			mThumnailView = (ImageView) mRootView 
+					.findViewById(R.id.thumnail);
+			mThumnailProgressBar = (ProgressBar) mRootView 
+					.findViewById(R.id.progress_bar);
+		}
+
+		public View getView(News news) {
+			setTitle(news);
+			setSrc(news);
+			setThumnailView(news);
+			return mRootView;
+		}
+
+		public abstract void setTitle(News news);
+
+		public abstract void setSrc(News news);
+
+		public abstract void setThumnailView(News news);
 	}
 }

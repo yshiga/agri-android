@@ -35,18 +35,12 @@ public class MainActivity extends FragmentActivity implements
 
 	private final static int TAB_COLOR_UNSELECTED = Color.parseColor("#F0F0EE");
 
-	private void setupCrittercism() {
-		Crittercism.initialize(getApplicationContext(),
-				AppConst.CRITTERCISM_KEY);
-	}
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
 		setupCrittercism();
-
 		setTitle(getResources().getString(R.string.app_name));
 
 		final ActionBar actionBar = getActionBar();
@@ -57,6 +51,10 @@ public class MainActivity extends FragmentActivity implements
 
 	}
 
+	private void setupCrittercism() {
+		Crittercism.initialize(getApplicationContext(),
+				AppConst.CRITTERCISM_KEY);
+	}
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
