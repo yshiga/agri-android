@@ -7,8 +7,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
+import com.parse.FindCallback;
 
 import jp.co.smart_agri.news.R;
+import jp.co.smart_agri.news.activity.MainActivity;
 import jp.co.smart_agri.news.activity.NewsWebViewActivity;
 import jp.co.smart_agri.news.application.MyApplication;
 import jp.co.smart_agri.news.config.AppConst;
@@ -81,9 +83,20 @@ public class NewsTabFragment extends Fragment {
 				startNewsWebViewActivity(news);
 			}
 		});
-		getNews();
 
+		TextView errMsgView = (TextView) rootView.findViewById(R.id.errmsg);
+		if (isOnline()) {
+			getNews();
+			errMsgView.setVisibility(View.GONE);
+		} else {
+			errMsgView.setVisibility(View.VISIBLE);
+		}
 		return rootView;
+	}
+
+	private boolean isOnline() {
+		MainActivity activity = (MainActivity) getActivity();
+		return activity.isOnline();
 	}
 
 	private void startNewsWebViewActivity(News news) {
@@ -162,7 +175,8 @@ public class NewsTabFragment extends Fragment {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			News news = (News) getItem(position);
-			NewsListRowViewBuilderBase listRowViewBuilder = new NormalListRowViewBilder(R.layout.list_news, parent); 
+			NewsListRowViewBuilderBase listRowViewBuilder = new NormalListRowViewBilder(
+					R.layout.list_news, parent);
 			return listRowViewBuilder.getView(news);
 		}
 	}
@@ -200,35 +214,35 @@ public class NewsTabFragment extends Fragment {
 			mThumnailView.setVisibility(View.VISIBLE);
 			mThumnailProgressBar.setVisibility(View.VISIBLE);
 
-			ImageListener listener = MyImageLoader.getImageListener(mThumnailView, 
-					mThumnailProgressBar);
+			ImageListener listener = MyImageLoader.getImageListener(
+					mThumnailView, mThumnailProgressBar);
 			mImageLoader.get(news.getImageUrl(), listener);
 		}
 	}
 
 	/**
 	 * newsのViewを生成する共通クラス
+	 * 
 	 * @author shigayuuichi
 	 */
 	abstract class NewsListRowViewBuilderBase {
 
 		View mRootView;
-		ImageLoader mImageLoader = new ImageLoader(MyApplication
-				.getInstance().getRequestQueue(), new MyImageCache());
+		ImageLoader mImageLoader = new ImageLoader(MyApplication.getInstance()
+				.getRequestQueue(), new MyImageCache());
 		TextView mTitleView;
 		TextView mSrcView;
 		ImageView mThumnailView;
 		ProgressBar mThumnailProgressBar;
-		
+
 		public NewsListRowViewBuilderBase(int layoutId, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) getActivity()
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			mRootView = inflater.inflate(R.layout.list_news, parent, false);
 			mTitleView = (TextView) mRootView.findViewById(R.id.title);
 			mSrcView = (TextView) mRootView.findViewById(R.id.src);
-			mThumnailView = (ImageView) mRootView 
-					.findViewById(R.id.thumnail);
-			mThumnailProgressBar = (ProgressBar) mRootView 
+			mThumnailView = (ImageView) mRootView.findViewById(R.id.thumnail);
+			mThumnailProgressBar = (ProgressBar) mRootView
 					.findViewById(R.id.progress_bar);
 		}
 
