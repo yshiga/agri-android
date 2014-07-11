@@ -206,13 +206,13 @@ public class NewsTabFragment extends Fragment {
 		public void setThumnailView(News news) {
 
 			if (!news.hasImage()) {
+				mThumnailArea.setVisibility(View.GONE);
 				mThumnailView.setVisibility(View.GONE);
 				mThumnailProgressBar.setVisibility(View.GONE);
 				return;
 			}
 
-			mThumnailView.setVisibility(View.VISIBLE);
-			mThumnailProgressBar.setVisibility(View.VISIBLE);
+			mThumnailArea.setVisibility(View.VISIBLE);
 
 			ImageListener listener = MyImageLoader.getImageListener(
 					mThumnailView, mThumnailProgressBar);
@@ -234,6 +234,7 @@ public class NewsTabFragment extends Fragment {
 		TextView mSrcView;
 		ImageView mThumnailView;
 		ProgressBar mThumnailProgressBar;
+		ViewGroup mThumnailArea;
 
 		public NewsListRowViewBuilderBase(int layoutId, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) getActivity()
@@ -244,6 +245,8 @@ public class NewsTabFragment extends Fragment {
 			mThumnailView = (ImageView) mRootView.findViewById(R.id.thumnail);
 			mThumnailProgressBar = (ProgressBar) mRootView
 					.findViewById(R.id.progress_bar);
+			mThumnailArea = (ViewGroup) mRootView
+					.findViewById(R.id.thumnail_area); 
 		}
 
 		public View getView(News news) {

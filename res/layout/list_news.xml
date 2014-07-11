@@ -44,6 +44,7 @@
     <!-- 右カラム -->
 
     <FrameLayout
+		android:id="@+id/thumnail_area"
         android:layout_width="100dp"
         android:layout_height="100dp" >
 
