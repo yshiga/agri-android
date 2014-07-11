@@ -13,8 +13,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.app.ActionBar;
 import android.app.ActionBar.Tab;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.view.PagerAdapter;
@@ -35,18 +38,12 @@ public class MainActivity extends FragmentActivity implements
 
 	private final static int TAB_COLOR_UNSELECTED = Color.parseColor("#F0F0EE");
 
-	private void setupCrittercism() {
-		Crittercism.initialize(getApplicationContext(),
-				AppConst.CRITTERCISM_KEY);
-	}
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
 		setupCrittercism();
-
 		setTitle(getResources().getString(R.string.app_name));
 
 		final ActionBar actionBar = getActionBar();
@@ -57,6 +54,19 @@ public class MainActivity extends FragmentActivity implements
 
 	}
 
+	public boolean isOnline() {
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo netInfo = cm.getActiveNetworkInfo();
+		if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+			return true;
+		}
+		return false;
+	}
+
+	private void setupCrittercism() {
+		Crittercism.initialize(getApplicationContext(),
+				AppConst.CRITTERCISM_KEY);
+	}
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
