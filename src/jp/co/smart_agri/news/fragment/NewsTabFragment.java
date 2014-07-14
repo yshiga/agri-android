@@ -7,6 +7,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.parse.FindCallback;
 
 import jp.co.smart_agri.news.R;
@@ -23,6 +26,7 @@ import jp.co.smart_agri.news.object.NewsList;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,28 +54,37 @@ public class NewsTabFragment extends Fragment {
 		return fragment;
 	}
 
-	NewsListAdapter mAdapter;
-
+	private NewsListAdapter mAdapter;
 	private ProgressBar mLoadingCircle;
+	private TextView mErrMsgView;
+	private PullToRefreshListView mListView;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_news_tab, container,
 				false);
-		mAdapter = new NewsListAdapter();
-
 		mLoadingCircle = (ProgressBar) rootView
 				.findViewById(R.id.progress_circle);
 
 		View topBar = rootView.findViewById(R.id.top_bar);
 		topBar.setBackgroundColor(AppUtils.getColorByCid(getNewsCaterogyId()));
 
-		mNewsList = new NewsList();
-		ListView listView = (ListView) rootView.findViewById(R.id.list);
-		listView.setAdapter(mAdapter);
+		mErrMsgView = (TextView) rootView.findViewById(R.id.errmsg);
 
-		listView.setOnItemClickListener(new OnItemClickListener() {
+		setupListView(rootView);
+		loadNews(LOAD_MODE.INIT);
+
+		return rootView;
+	}
+
+	private void setupListView(View rootView) {
+		mNewsList = new NewsList();
+		mAdapter = new NewsListAdapter();
+		mListView = (PullToRefreshListView) rootView.findViewById(R.id.list);
+		mListView.setAdapter(mAdapter);
+
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -84,14 +97,13 @@ public class NewsTabFragment extends Fragment {
 			}
 		});
 
-		TextView errMsgView = (TextView) rootView.findViewById(R.id.errmsg);
-		if (isOnline()) {
-			getNews();
-			errMsgView.setVisibility(View.GONE);
-		} else {
-			errMsgView.setVisibility(View.VISIBLE);
-		}
-		return rootView;
+		mListView.setOnRefreshListener(new OnRefreshListener<ListView>() {
+
+			@Override
+			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
+				loadNews(LOAD_MODE.RELOAD);
+			}
+		});
 	}
 
 	private boolean isOnline() {
@@ -113,27 +125,68 @@ public class NewsTabFragment extends Fragment {
 
 	};
 
-	private void getNews() {
-		// TODO fragment内で通信するのはよくないが、一旦これで実装
+	private void showError(String msg) {
+		mErrMsgView.setVisibility(View.VISIBLE);
+		mErrMsgView.setText(msg);
+	}
+
+	private void hideError() {
+		mErrMsgView.setVisibility(View.GONE);
+	}
+
+	private enum LOAD_MODE {
+		INIT, RELOAD
+	}
+
+	private void loadNews(LOAD_MODE mode) {
+
+		if (isOnline()) {
+			hideError();
+		} else {
+			showError("インターネットに接続されていません");
+			return;
+		}
+
+		Response.Listener<JSONArray> successListener;
+		if (mode == LOAD_MODE.INIT) {
+			mLoadingCircle.setVisibility(View.VISIBLE);
+			successListener = mInitLoadNewsListener;
+		} else {
+			successListener = mReloadNewsListener;
+		}
+
 		JsonArrayRequest req = new JsonArrayRequest(AppConst.API_BASE_URL
 				+ AppUtils.getApiPathByCid(getNewsCaterogyId()),
-				new Response.Listener<JSONArray>() {
-					@Override
-					public void onResponse(JSONArray response) {
-						mNewsList.convertFromJsonArray(response);
-						mAdapter.notifyDataSetChanged();
-						mLoadingCircle.setVisibility(View.GONE);
-					}
-				}, new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						mLoadingCircle.setVisibility(View.GONE);
-					}
-				});
+				successListener, mResponseErrorListener);
 
 		MyApplication.getInstance().addToRequestQueue(req);
-		mLoadingCircle.setVisibility(View.VISIBLE);
 	}
+
+	private Response.Listener<JSONArray> mInitLoadNewsListener = new Response.Listener<JSONArray>() {
+		@Override
+		public void onResponse(JSONArray response) {
+			mNewsList.convertFromJsonArray(response);
+			mAdapter.notifyDataSetChanged();
+			mLoadingCircle.setVisibility(View.GONE);
+		}
+	};
+
+	private Response.Listener<JSONArray> mReloadNewsListener = new Response.Listener<JSONArray>() {
+		@Override
+		public void onResponse(JSONArray response) {
+			mNewsList.convertFromJsonArray(response);
+			mAdapter.notifyDataSetChanged();
+			mListView.onRefreshComplete();
+		}
+	};
+
+	private Response.ErrorListener mResponseErrorListener = new Response.ErrorListener() {
+		@Override
+		public void onErrorResponse(VolleyError error) {
+			mLoadingCircle.setVisibility(View.GONE);
+			showError("エラーが発生しました");
+		}
+	};
 
 	@Override
 	public void onPause() {
@@ -246,7 +299,7 @@ public class NewsTabFragment extends Fragment {
 			mThumnailProgressBar = (ProgressBar) mRootView
 					.findViewById(R.id.progress_bar);
 			mThumnailArea = (ViewGroup) mRootView
-					.findViewById(R.id.thumnail_area); 
+					.findViewById(R.id.thumnail_area);
 		}
 
 		public View getView(News news) {
