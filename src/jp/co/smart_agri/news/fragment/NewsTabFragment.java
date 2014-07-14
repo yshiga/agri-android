@@ -228,48 +228,28 @@ public class NewsTabFragment extends Fragment {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			News news = (News) getItem(position);
-			NewsListRowViewBuilderBase listRowViewBuilder = new NormalListRowViewBilder(
-					R.layout.list_news, parent);
+			NewsListRowViewBuilderBase listRowViewBuilder;
+			if (position == 0) {
+				listRowViewBuilder = new TopListRowViewBilder(parent);
+			} else {
+				listRowViewBuilder = new NormalListRowViewBilder(parent);
+			}
+
 			return listRowViewBuilder.getView(news);
+		}
+	}
+
+	class TopListRowViewBilder extends NewsListRowViewBuilderBase {
+
+		public TopListRowViewBilder(ViewGroup parent) {
+			super(R.layout.list_news_top, parent);
 		}
 	}
 
 	class NormalListRowViewBilder extends NewsListRowViewBuilderBase {
 
-		public NormalListRowViewBilder(int layoutId, ViewGroup parent) {
-			super(layoutId, parent);
-		}
-
-		@Override
-		public void setTitle(News news) {
-			mTitleView.setText(news.getTitle());
-		}
-
-		@Override
-		public void setSrc(News news) {
-			if (!news.hasVia()) {
-				mSrcView.setVisibility(View.GONE);
-				return;
-			}
-			mSrcView.setVisibility(View.VISIBLE);
-			mSrcView.setText(news.getVia());
-		}
-
-		@Override
-		public void setThumnailView(News news) {
-
-			if (!news.hasImage()) {
-				mThumnailArea.setVisibility(View.GONE);
-				mThumnailView.setVisibility(View.GONE);
-				mThumnailProgressBar.setVisibility(View.GONE);
-				return;
-			}
-
-			mThumnailArea.setVisibility(View.VISIBLE);
-
-			ImageListener listener = MyImageLoader.getImageListener(
-					mThumnailView, mThumnailProgressBar);
-			mImageLoader.get(news.getImageUrl(), listener);
+		public NormalListRowViewBilder(ViewGroup parent) {
+			super(R.layout.list_news_normal, parent);
 		}
 	}
 
@@ -283,23 +263,14 @@ public class NewsTabFragment extends Fragment {
 		View mRootView;
 		ImageLoader mImageLoader = new ImageLoader(MyApplication.getInstance()
 				.getRequestQueue(), new MyImageCache());
-		TextView mTitleView;
-		TextView mSrcView;
-		ImageView mThumnailView;
-		ProgressBar mThumnailProgressBar;
-		ViewGroup mThumnailArea;
+
 
 		public NewsListRowViewBuilderBase(int layoutId, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) getActivity()
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			mRootView = inflater.inflate(R.layout.list_news, parent, false);
-			mTitleView = (TextView) mRootView.findViewById(R.id.title);
-			mSrcView = (TextView) mRootView.findViewById(R.id.src);
-			mThumnailView = (ImageView) mRootView.findViewById(R.id.thumnail);
-			mThumnailProgressBar = (ProgressBar) mRootView
-					.findViewById(R.id.progress_bar);
-			mThumnailArea = (ViewGroup) mRootView
-					.findViewById(R.id.thumnail_area);
+			mRootView = inflater.inflate(layoutId , parent,
+					false);
+
 		}
 
 		public View getView(News news) {
@@ -308,11 +279,41 @@ public class NewsTabFragment extends Fragment {
 			setThumnailView(news);
 			return mRootView;
 		}
+		
+		protected void setTitle(News news) {
+			TextView titleView = (TextView) mRootView.findViewById(R.id.title);
+			titleView.setText(news.getTitle());
+		}
 
-		public abstract void setTitle(News news);
+		protected void setSrc(News news) {
+			TextView srcView = (TextView) mRootView.findViewById(R.id.src);
+			if (!news.hasVia()) {
+				srcView.setVisibility(View.GONE);
+				return;
+			}
+			srcView.setVisibility(View.VISIBLE);
+			srcView.setText(news.getVia());
+		}
 
-		public abstract void setSrc(News news);
+		protected void setThumnailView(News news) {
+			ImageView thumnailView = (ImageView) mRootView.findViewById(R.id.thumnail);
+			ProgressBar thumnailProgressBar = (ProgressBar) mRootView
+					.findViewById(R.id.progress_bar);
+			ViewGroup thumnailArea = (ViewGroup) mRootView
+					.findViewById(R.id.thumnail_area);
 
-		public abstract void setThumnailView(News news);
+			if (!news.hasImage()) {
+				thumnailArea.setVisibility(View.GONE);
+				thumnailView.setVisibility(View.GONE);
+				thumnailProgressBar.setVisibility(View.GONE);
+				return;
+			}
+
+			thumnailArea.setVisibility(View.VISIBLE);
+
+			ImageListener listener = MyImageLoader.getImageListener(
+					thumnailView, thumnailProgressBar);
+			mImageLoader.get(news.getImageUrl(), listener);
+		}
 	}
 }
