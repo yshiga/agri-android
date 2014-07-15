@@ -90,7 +90,7 @@ public class NewsTabFragment extends Fragment {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 
-				News news = mNewsList.get(position);
+				News news = (News) mAdapter.getItem((int) id);
 				MyFlurry.logEventViewArticle(news.getId(), getNewsCaterogyId());
 
 				startNewsWebViewActivity(news);
@@ -264,12 +264,10 @@ public class NewsTabFragment extends Fragment {
 		ImageLoader mImageLoader = new ImageLoader(MyApplication.getInstance()
 				.getRequestQueue(), new MyImageCache());
 
-
 		public NewsListRowViewBuilderBase(int layoutId, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) getActivity()
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			mRootView = inflater.inflate(layoutId , parent,
-					false);
+			mRootView = inflater.inflate(layoutId, parent, false);
 
 		}
 
@@ -279,7 +277,7 @@ public class NewsTabFragment extends Fragment {
 			setThumnailView(news);
 			return mRootView;
 		}
-		
+
 		protected void setTitle(News news) {
 			TextView titleView = (TextView) mRootView.findViewById(R.id.title);
 			titleView.setText(news.getTitle());
@@ -296,7 +294,8 @@ public class NewsTabFragment extends Fragment {
 		}
 
 		protected void setThumnailView(News news) {
-			ImageView thumnailView = (ImageView) mRootView.findViewById(R.id.thumnail);
+			ImageView thumnailView = (ImageView) mRootView
+					.findViewById(R.id.thumnail);
 			ProgressBar thumnailProgressBar = (ProgressBar) mRootView
 					.findViewById(R.id.progress_bar);
 			ViewGroup thumnailArea = (ViewGroup) mRootView
