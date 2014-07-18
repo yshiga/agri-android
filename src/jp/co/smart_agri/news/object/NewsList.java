@@ -10,14 +10,29 @@ import org.json.JSONObject;
  * ニュースのリスト
  */
 public class NewsList {
+	
+	enum MODE {
+		ADDITION, REPLACE
+	}
 
 	private ArrayList<News> mList = new ArrayList<News>();
 
+	public void initFromJsonArray(JSONArray jsonArray) {
+		convertFromJsonArray(jsonArray, MODE.REPLACE);
+	}
+	
+	public void addFromJsonArray(JSONArray jsonArray) {
+		convertFromJsonArray(jsonArray, MODE.ADDITION);
+	}
+	
+	
 	/**
 	 * APIレスポンスから生成する
 	 */
-	public void convertFromJsonArray(JSONArray jsonArray) {
-		mList.clear();
+	private void convertFromJsonArray(JSONArray jsonArray, MODE mode) {
+		if(mode == MODE.REPLACE) {
+			mList.clear();
+		}
 		for (int i = 0; i < jsonArray.length(); i++) {
 			try {
 				JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -30,6 +45,7 @@ public class NewsList {
 			}
 		}
 	}
+	
 
 	public int getCount() {
 		return mList.size();

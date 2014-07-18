@@ -10,6 +10,7 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.Mode;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.parse.FindCallback;
@@ -34,6 +35,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -41,6 +44,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class NewsTabFragment extends Fragment {
 
@@ -102,6 +106,22 @@ public class NewsTabFragment extends Fragment {
 			}
 		});
 
+		mListView.setOnScrollListener(new OnScrollListener() {
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+			}
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				int lastItem = firstVisibleItem + visibleItemCount;
+				if (lastItem == totalItemCount) {
+					addNews();
+				}
+			}
+		});
+
 		mListView.setOnRefreshListener(new OnRefreshListener<ListView>() {
 
 			@Override
@@ -143,6 +163,24 @@ public class NewsTabFragment extends Fragment {
 		INIT, RELOAD
 	}
 
+	private void addNews() {
+		if (isOnline()) {
+		} else {
+			return;
+		}
+
+		// ここでローディング表示を出す
+
+		execRequest(mAddLoadNewsListener, mResponseErrorListener);
+	}
+	
+	private void execRequest(Response.Listener<JSONArray> successListener, Response.ErrorListener errorListener) {
+			JsonArrayRequest req = new JsonArrayRequest(AppConst.API_BASE_URL
+				+ AppUtils.getApiPathByCid(getNewsCaterogyId()),
+				successListener, errorListener);
+		MyApplication.getInstance().addToRequestQueue(req);	
+	}
+
 	private void loadNews(LOAD_MODE mode) {
 
 		if (isOnline()) {
@@ -160,17 +198,22 @@ public class NewsTabFragment extends Fragment {
 			successListener = mReloadNewsListener;
 		}
 
-		JsonArrayRequest req = new JsonArrayRequest(AppConst.API_BASE_URL
-				+ AppUtils.getApiPathByCid(getNewsCaterogyId()),
-				successListener, mResponseErrorListener);
-
-		MyApplication.getInstance().addToRequestQueue(req);
+		execRequest(successListener, mResponseErrorListener);
 	}
+	
+	private Response.Listener<JSONArray> mAddLoadNewsListener = new Response.Listener<JSONArray>() {
+		@Override
+		public void onResponse(JSONArray response) {
+			mNewsList.addFromJsonArray(response);
+			mAdapter.notifyDataSetChanged();
+			mLoadingCircle.setVisibility(View.GONE);
+		}
+	};
 
 	private Response.Listener<JSONArray> mInitLoadNewsListener = new Response.Listener<JSONArray>() {
 		@Override
 		public void onResponse(JSONArray response) {
-			mNewsList.convertFromJsonArray(response);
+			mNewsList.initFromJsonArray(response);
 			mAdapter.notifyDataSetChanged();
 			mLoadingCircle.setVisibility(View.GONE);
 		}
@@ -179,7 +222,7 @@ public class NewsTabFragment extends Fragment {
 	private Response.Listener<JSONArray> mReloadNewsListener = new Response.Listener<JSONArray>() {
 		@Override
 		public void onResponse(JSONArray response) {
-			mNewsList.convertFromJsonArray(response);
+			mNewsList.initFromJsonArray(response);
 			mAdapter.notifyDataSetChanged();
 			mListView.onRefreshComplete();
 		}
