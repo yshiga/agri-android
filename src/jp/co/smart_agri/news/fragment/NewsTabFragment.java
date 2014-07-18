@@ -7,6 +7,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
@@ -16,6 +18,7 @@ import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.activity.MainActivity;
 import jp.co.smart_agri.news.activity.NewsWebViewActivity;
 import jp.co.smart_agri.news.application.MyApplication;
+import jp.co.smart_agri.news.application.MyApplication.TrackerName;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.lib.AppUtils;
 import jp.co.smart_agri.news.lib.MyFlurry;
@@ -92,6 +95,8 @@ public class NewsTabFragment extends Fragment {
 
 				News news = (News) mAdapter.getItem((int) id);
 				MyFlurry.logEventViewArticle(news.getId(), getNewsCaterogyId());
+
+				logEventViewArticle(getNewsCaterogyId(), Integer.valueOf(news.getId()));
 
 				startNewsWebViewActivity(news);
 			}
@@ -202,6 +207,18 @@ public class NewsTabFragment extends Fragment {
 	private int getNewsCaterogyId() {
 		Bundle args = getArguments();
 		return args.getInt(ARG_CATEGORY_ID);
+	}
+
+	private void logEventViewArticle(int categoryId, int articleId) {
+		Tracker t = ((MyApplication) getActivity().getApplication())
+				.getTracker(TrackerName.APP_TRACKER);
+		// Build and send an Event.
+		t.send(new HitBuilders.EventBuilder()
+				.setCategory("VIEW_ARTICLE")
+				.setAction("VIEW_ARTICLE")
+				.setLabel("CATEGORY_ID").setValue(categoryId)
+				.setLabel("ARTICLE_ID").setValue(articleId)
+				.build());
 	}
 
 	private class NewsListAdapter extends BaseAdapter {

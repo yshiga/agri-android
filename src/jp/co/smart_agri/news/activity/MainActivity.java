@@ -1,8 +1,11 @@
 package jp.co.smart_agri.news.activity;
 
 import com.crittercism.app.Crittercism;
-
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import jp.co.smart_agri.news.R;
+import jp.co.smart_agri.news.application.MyApplication;
+import jp.co.smart_agri.news.application.MyApplication.TrackerName;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.fragment.NewsTabFragment;
 import jp.co.smart_agri.news.lib.AppUtils;
@@ -19,7 +22,6 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
@@ -52,6 +54,16 @@ public class MainActivity extends FragmentActivity implements
 		setupViewPager();
 		setupTab();
 
+	}
+	
+
+	@Override
+	protected void onResume(){
+		super.onResume();
+
+		Tracker t = ((MyApplication) getApplication()).getTracker(TrackerName.APP_TRACKER);
+		t.setScreenName(MainActivity.class.getSimpleName());
+		t.send(new HitBuilders.AppViewBuilder().build());
 	}
 
 	public boolean isOnline() {
