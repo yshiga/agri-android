@@ -116,8 +116,9 @@ public class NewsTabFragment extends Fragment {
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
+				int loadStartCount = 2;
 				int lastItem = firstVisibleItem + visibleItemCount;
-				if (lastItem == totalItemCount && mNewsList.getCount() > 0) {
+				if (lastItem + loadStartCount > totalItemCount && mNewsList.getCount() > 0) {
 					Log.i(TAG, "addNews()" + mNewsList.getCount() + "/"
 							+ totalItemCount);
 					addNews();

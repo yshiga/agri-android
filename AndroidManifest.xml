@@ -30,6 +30,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="jp.co.smart_agri.news.activity.MainActivity"
+            android:theme="@style/slideAnim" 
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,7 +40,8 @@
         </activity>
         <activity
             android:name="jp.co.smart_agri.news.activity.NewsWebViewActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:theme="@style/slideAnim" >
         </activity>
         <activity
             android:name="jp.co.smart_agri.news.activity.SettingActivity"
