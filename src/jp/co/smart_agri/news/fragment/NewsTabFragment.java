@@ -10,10 +10,8 @@ import com.android.volley.toolbox.ImageLoader.ImageListener;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshBase.Mode;
 import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
 import com.handmark.pulltorefresh.library.PullToRefreshListView;
-import com.parse.FindCallback;
 
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.activity.MainActivity;
@@ -30,8 +28,8 @@ import jp.co.smart_agri.news.object.NewsList;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +47,9 @@ import android.widget.Toast;
 public class NewsTabFragment extends Fragment {
 
 	private static final String ARG_CATEGORY_ID = "category_id";
+
+	private static final String TAG = NewsTabFragment.class.getSimpleName();
+
 	private NewsList mNewsList;
 
 	public NewsTabFragment() {
@@ -100,8 +101,8 @@ public class NewsTabFragment extends Fragment {
 				News news = (News) mAdapter.getItem((int) id);
 				MyFlurry.logEventViewArticle(news.getId(), getNewsCaterogyId());
 
-				logEventViewArticle(getNewsCaterogyId(), Integer.valueOf(news.getId()));
-
+				logEventViewArticle(getNewsCaterogyId(),
+						Integer.valueOf(news.getId()));
 				startNewsWebViewActivity(news);
 			}
 		});
@@ -116,7 +117,9 @@ public class NewsTabFragment extends Fragment {
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
 				int lastItem = firstVisibleItem + visibleItemCount;
-				if (lastItem == totalItemCount) {
+				if (lastItem == totalItemCount && mNewsList.getCount() > 0) {
+					Log.i(TAG, "addNews()" + mNewsList.getCount() + "/"
+							+ totalItemCount);
 					addNews();
 				}
 			}
@@ -163,26 +166,49 @@ public class NewsTabFragment extends Fragment {
 		INIT, RELOAD
 	}
 
+	private boolean mIsAddingFlag = false;
+
 	private void addNews() {
+
+		if (mNewsList.getCount() >= 30) {
+			// Toast.makeText(getActivity(), "これ以上の記事はありません。",
+			// Toast.LENGTH_SHORT).show();
+			return;
+		}
+
 		if (isOnline()) {
 		} else {
 			return;
 		}
 
-		// ここでローディング表示を出す
+		if(mIsAddingFlag) {
+			return;
+		}
 
-		execRequest(mAddLoadNewsListener, mResponseErrorListener);
+		mIsAddingFlag = true;
+		// ここでローディング表示を出す
+		execRequest(mAddLoadNewsListener, mAddResponseErrorListener,
+				mNewsList.getCount());
 	}
-	
-	private void execRequest(Response.Listener<JSONArray> successListener, Response.ErrorListener errorListener) {
-			JsonArrayRequest req = new JsonArrayRequest(AppConst.API_BASE_URL
-				+ AppUtils.getApiPathByCid(getNewsCaterogyId()),
+
+	private void execRequest(Response.Listener<JSONArray> successListener,
+			Response.ErrorListener errorListener, int offset) {
+		JsonArrayRequest req = new JsonArrayRequest(getApiUrl(offset),
 				successListener, errorListener);
-		MyApplication.getInstance().addToRequestQueue(req);	
+		MyApplication.getInstance().addToRequestQueue(req);
+	}
+
+	private String getApiUrl(int offset) {
+		String url = AppConst.API_BASE_URL
+				+ AppUtils.getApiPathByCid(getNewsCaterogyId()) + "?offset="
+				+ offset;
+		Log.i(TAG, "api url:" + url);
+		return url;
 	}
 
 	private void loadNews(LOAD_MODE mode) {
 
+		Log.i(TAG, "loadNews() mode:" + mode);
 		if (isOnline()) {
 			hideError();
 		} else {
@@ -198,15 +224,16 @@ public class NewsTabFragment extends Fragment {
 			successListener = mReloadNewsListener;
 		}
 
-		execRequest(successListener, mResponseErrorListener);
+		execRequest(successListener, mResponseErrorListener, 0);
 	}
-	
+
 	private Response.Listener<JSONArray> mAddLoadNewsListener = new Response.Listener<JSONArray>() {
 		@Override
 		public void onResponse(JSONArray response) {
 			mNewsList.addFromJsonArray(response);
 			mAdapter.notifyDataSetChanged();
 			mLoadingCircle.setVisibility(View.GONE);
+			mIsAddingFlag = false;
 		}
 	};
 
@@ -236,6 +263,13 @@ public class NewsTabFragment extends Fragment {
 		}
 	};
 
+	private Response.ErrorListener mAddResponseErrorListener = new Response.ErrorListener() {
+		@Override
+		public void onErrorResponse(VolleyError error) {
+			mIsAddingFlag = false;
+		}
+	};
+
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -256,12 +290,10 @@ public class NewsTabFragment extends Fragment {
 		Tracker t = ((MyApplication) getActivity().getApplication())
 				.getTracker(TrackerName.APP_TRACKER);
 		// Build and send an Event.
-		t.send(new HitBuilders.EventBuilder()
-				.setCategory("VIEW_ARTICLE")
-				.setAction("VIEW_ARTICLE")
-				.setLabel("CATEGORY_ID").setValue(categoryId)
-				.setLabel("ARTICLE_ID").setValue(articleId)
-				.build());
+		t.send(new HitBuilders.EventBuilder().setCategory("VIEW_ARTICLE")
+				.setAction("VIEW_ARTICLE").setLabel("CATEGORY_ID")
+				.setValue(categoryId).setLabel("ARTICLE_ID")
+				.setValue(articleId).build());
 	}
 
 	private class NewsListAdapter extends BaseAdapter {
