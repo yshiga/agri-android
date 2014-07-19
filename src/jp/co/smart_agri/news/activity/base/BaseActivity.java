@@ -1,6 +1,5 @@
 package jp.co.smart_agri.news.activity.base;
 
-import jp.co.smart_agri.news.lib.MyFlurry;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -18,13 +17,11 @@ public class BaseActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		MyFlurry.onStartSession(this);
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
-		MyFlurry.onEndSession(this);
 	}
 	
 	protected void startSettingActivity(){

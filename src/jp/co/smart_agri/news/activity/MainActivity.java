@@ -10,7 +10,6 @@ import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.fragment.NewsTabFragment;
 import jp.co.smart_agri.news.lib.AppUtils;
 import jp.co.smart_agri.news.lib.BackBtnFinishConfirmer;
-import jp.co.smart_agri.news.lib.MyFlurry;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -122,8 +121,6 @@ public class MainActivity extends FragmentActivity implements
 		mViewPager.setCurrentItem(tab.getPosition());
 		resetTabStyle();
 		setTabStyleOnSelected(tab.getPosition());
-
-		MyFlurry.logEventSwitchTab(AppUtils.tabPosi2Cid(tab.getPosition()));
 	}
 
 	@Override

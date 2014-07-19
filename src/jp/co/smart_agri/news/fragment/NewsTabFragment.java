@@ -20,7 +20,6 @@ import jp.co.smart_agri.news.application.MyApplication;
 import jp.co.smart_agri.news.application.MyApplication.TrackerName;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.lib.AppUtils;
-import jp.co.smart_agri.news.lib.MyFlurry;
 import jp.co.smart_agri.news.lib.MyImageCache;
 import jp.co.smart_agri.news.lib.MyImageLoader;
 import jp.co.smart_agri.news.object.News;
@@ -99,7 +98,6 @@ public class NewsTabFragment extends Fragment {
 					int position, long id) {
 
 				News news = (News) mAdapter.getItem((int) id);
-				MyFlurry.logEventViewArticle(news.getId(), getNewsCaterogyId());
 
 				logEventViewArticle(getNewsCaterogyId(),
 						Integer.valueOf(news.getId()));
