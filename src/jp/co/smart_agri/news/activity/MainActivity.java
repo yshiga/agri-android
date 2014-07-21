@@ -1,17 +1,26 @@
 package jp.co.smart_agri.news.activity;
 
 import com.crittercism.app.Crittercism;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import jp.co.smart_agri.news.R;
+import jp.co.smart_agri.news.application.MyApplication;
+import jp.co.smart_agri.news.application.MyApplication.TrackerName;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.fragment.NewsTabFragment;
+import jp.co.smart_agri.news.lib.AlarmManagerUtils;
+import jp.co.smart_agri.news.lib.AppSettings;
 import jp.co.smart_agri.news.lib.AppUtils;
 import jp.co.smart_agri.news.lib.BackBtnFinishConfirmer;
-import jp.co.smart_agri.news.lib.MyFlurry;
+import jp.co.smart_agri.news.lib.MyParse;
+import jp.co.smart_agri.news.lib.NotificationUtils;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.app.ActionBar;
+import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.ActionBar.Tab;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +28,6 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.KeyEvent;
@@ -43,6 +51,12 @@ public class MainActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		if (new AppSettings(getApplicationContext()).isMorningAlarmOn()) {
+			AlarmManagerUtils.setMoriningAlarm(getApplicationContext());
+		}
+
+		// parseの設定で落ちるときがあるので、一旦Parseを切る
+		// MyParse.setupParsePush(getApplicationContext());
 		setupCrittercism();
 		setTitle(getResources().getString(R.string.app_name));
 
@@ -52,6 +66,16 @@ public class MainActivity extends FragmentActivity implements
 		setupViewPager();
 		setupTab();
 
+	}
+	
+
+	@Override
+	protected void onResume(){
+		super.onResume();
+
+		Tracker t = ((MyApplication) getApplication()).getTracker(TrackerName.APP_TRACKER);
+		t.setScreenName(MainActivity.class.getSimpleName());
+		t.send(new HitBuilders.AppViewBuilder().build());
 	}
 
 	public boolean isOnline() {
@@ -110,8 +134,6 @@ public class MainActivity extends FragmentActivity implements
 		mViewPager.setCurrentItem(tab.getPosition());
 		resetTabStyle();
 		setTabStyleOnSelected(tab.getPosition());
-
-		MyFlurry.logEventSwitchTab(AppUtils.tabPosi2Cid(tab.getPosition()));
 	}
 
 	@Override

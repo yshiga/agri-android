@@ -2,8 +2,11 @@ package jp.co.smart_agri.news.activity;
 
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.activity.base.BaseActivity;
+import jp.co.smart_agri.news.lib.AlarmManagerUtils;
+import jp.co.smart_agri.news.lib.AppSettings;
 import jp.co.smart_agri.news.lib.MyParse;
 import android.app.ActionBar;
+import android.app.AlarmManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.CheckBox;
@@ -21,7 +24,7 @@ public class SettingActivity extends BaseActivity {
 
 		CheckBox morinigPushBox = (CheckBox) findViewById(R.id.morning_push_checkbox);
 
-		morinigPushBox.setChecked(MyParse.isSubscribeMorning(getApplicationContext()));
+		morinigPushBox.setChecked(new AppSettings(getApplicationContext()).isMorningAlarmOn());
 		
 		morinigPushBox
 				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -29,7 +32,12 @@ public class SettingActivity extends BaseActivity {
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView,
 							boolean isChecked) {
-						MyParse.setSubscribeMorning(getApplicationContext(), isChecked);
+						new AppSettings(getApplicationContext()).setMorningAlarm(isChecked);
+						if(isChecked){
+							AlarmManagerUtils.setMoriningAlarm(getApplicationContext());
+						} else {
+							AlarmManagerUtils.resetMoriningAlarm(getApplicationContext());
+						}
 					}
 				});
 

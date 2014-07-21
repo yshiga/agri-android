@@ -7,15 +7,19 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.ImageLoader.ImageListener;
-import com.parse.FindCallback;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+import com.handmark.pulltorefresh.library.PullToRefreshBase;
+import com.handmark.pulltorefresh.library.PullToRefreshBase.OnRefreshListener;
+import com.handmark.pulltorefresh.library.PullToRefreshListView;
 
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.activity.MainActivity;
 import jp.co.smart_agri.news.activity.NewsWebViewActivity;
 import jp.co.smart_agri.news.application.MyApplication;
+import jp.co.smart_agri.news.application.MyApplication.TrackerName;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.lib.AppUtils;
-import jp.co.smart_agri.news.lib.MyFlurry;
 import jp.co.smart_agri.news.lib.MyImageCache;
 import jp.co.smart_agri.news.lib.MyImageLoader;
 import jp.co.smart_agri.news.object.News;
@@ -24,9 +28,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -34,10 +41,14 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class NewsTabFragment extends Fragment {
 
 	private static final String ARG_CATEGORY_ID = "category_id";
+
+	private static final String TAG = NewsTabFragment.class.getSimpleName();
+
 	private NewsList mNewsList;
 
 	public NewsTabFragment() {
@@ -50,48 +61,76 @@ public class NewsTabFragment extends Fragment {
 		return fragment;
 	}
 
-	NewsListAdapter mAdapter;
-
+	private NewsListAdapter mAdapter;
 	private ProgressBar mLoadingCircle;
+	private TextView mErrMsgView;
+	private PullToRefreshListView mListView;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_news_tab, container,
 				false);
-		mAdapter = new NewsListAdapter();
-
 		mLoadingCircle = (ProgressBar) rootView
 				.findViewById(R.id.progress_circle);
 
 		View topBar = rootView.findViewById(R.id.top_bar);
 		topBar.setBackgroundColor(AppUtils.getColorByCid(getNewsCaterogyId()));
 
-		mNewsList = new NewsList();
-		ListView listView = (ListView) rootView.findViewById(R.id.list);
-		listView.setAdapter(mAdapter);
+		mErrMsgView = (TextView) rootView.findViewById(R.id.errmsg);
 
-		listView.setOnItemClickListener(new OnItemClickListener() {
+		setupListView(rootView);
+		loadNews(LOAD_MODE.INIT);
+
+		return rootView;
+	}
+
+	private void setupListView(View rootView) {
+		mNewsList = new NewsList();
+		mAdapter = new NewsListAdapter();
+		mListView = (PullToRefreshListView) rootView.findViewById(R.id.list);
+		mListView.setAdapter(mAdapter);
+
+		mListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 
-				News news = mNewsList.get(position);
-				MyFlurry.logEventViewArticle(news.getId(), getNewsCaterogyId());
+				News news = (News) mAdapter.getItem((int) id);
 
+				logEventViewArticle(getNewsCaterogyId(),
+						Integer.valueOf(news.getId()));
 				startNewsWebViewActivity(news);
 			}
 		});
 
-		TextView errMsgView = (TextView) rootView.findViewById(R.id.errmsg);
-		if (isOnline()) {
-			getNews();
-			errMsgView.setVisibility(View.GONE);
-		} else {
-			errMsgView.setVisibility(View.VISIBLE);
-		}
-		return rootView;
+		mListView.setOnScrollListener(new OnScrollListener() {
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+			}
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				int loadStartCount = 2;
+				int lastItem = firstVisibleItem + visibleItemCount;
+				if (lastItem + loadStartCount > totalItemCount && mNewsList.getCount() > 0) {
+					Log.i(TAG, "addNews()" + mNewsList.getCount() + "/"
+							+ totalItemCount);
+					addNews();
+				}
+			}
+		});
+
+		mListView.setOnRefreshListener(new OnRefreshListener<ListView>() {
+
+			@Override
+			public void onRefresh(PullToRefreshBase<ListView> refreshView) {
+				loadNews(LOAD_MODE.RELOAD);
+			}
+		});
 	}
 
 	private boolean isOnline() {
@@ -113,27 +152,122 @@ public class NewsTabFragment extends Fragment {
 
 	};
 
-	private void getNews() {
-		// TODO fragment内で通信するのはよくないが、一旦これで実装
-		JsonArrayRequest req = new JsonArrayRequest(AppConst.API_BASE_URL
-				+ AppUtils.getApiPathByCid(getNewsCaterogyId()),
-				new Response.Listener<JSONArray>() {
-					@Override
-					public void onResponse(JSONArray response) {
-						mNewsList.convertFromJsonArray(response);
-						mAdapter.notifyDataSetChanged();
-						mLoadingCircle.setVisibility(View.GONE);
-					}
-				}, new Response.ErrorListener() {
-					@Override
-					public void onErrorResponse(VolleyError error) {
-						mLoadingCircle.setVisibility(View.GONE);
-					}
-				});
-
-		MyApplication.getInstance().addToRequestQueue(req);
-		mLoadingCircle.setVisibility(View.VISIBLE);
+	private void showError(String msg) {
+		mErrMsgView.setVisibility(View.VISIBLE);
+		mErrMsgView.setText(msg);
 	}
+
+	private void hideError() {
+		mErrMsgView.setVisibility(View.GONE);
+	}
+
+	private enum LOAD_MODE {
+		INIT, RELOAD
+	}
+
+	private boolean mIsAddingFlag = false;
+
+	private void addNews() {
+
+		if (mNewsList.getCount() >= 30) {
+			// Toast.makeText(getActivity(), "これ以上の記事はありません。",
+			// Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		if (isOnline()) {
+		} else {
+			return;
+		}
+
+		if(mIsAddingFlag) {
+			return;
+		}
+
+		mIsAddingFlag = true;
+		// ここでローディング表示を出す
+		execRequest(mAddLoadNewsListener, mAddResponseErrorListener,
+				mNewsList.getCount());
+	}
+
+	private void execRequest(Response.Listener<JSONArray> successListener,
+			Response.ErrorListener errorListener, int offset) {
+		JsonArrayRequest req = new JsonArrayRequest(getApiUrl(offset),
+				successListener, errorListener);
+		MyApplication.getInstance().addToRequestQueue(req);
+	}
+
+	private String getApiUrl(int offset) {
+		String url = AppConst.API_BASE_URL
+				+ AppUtils.getApiPathByCid(getNewsCaterogyId()) + "?offset="
+				+ offset;
+		Log.i(TAG, "api url:" + url);
+		return url;
+	}
+
+	private void loadNews(LOAD_MODE mode) {
+
+		Log.i(TAG, "loadNews() mode:" + mode);
+		if (isOnline()) {
+			hideError();
+		} else {
+			showError("インターネットに接続されていません");
+			return;
+		}
+
+		Response.Listener<JSONArray> successListener;
+		if (mode == LOAD_MODE.INIT) {
+			mLoadingCircle.setVisibility(View.VISIBLE);
+			successListener = mInitLoadNewsListener;
+		} else {
+			successListener = mReloadNewsListener;
+		}
+
+		execRequest(successListener, mResponseErrorListener, 0);
+	}
+
+	private Response.Listener<JSONArray> mAddLoadNewsListener = new Response.Listener<JSONArray>() {
+		@Override
+		public void onResponse(JSONArray response) {
+			mNewsList.addFromJsonArray(response);
+			mAdapter.notifyDataSetChanged();
+			mLoadingCircle.setVisibility(View.GONE);
+			mIsAddingFlag = false;
+		}
+	};
+
+	private Response.Listener<JSONArray> mInitLoadNewsListener = new Response.Listener<JSONArray>() {
+		@Override
+		public void onResponse(JSONArray response) {
+			mNewsList.initFromJsonArray(response);
+			mAdapter.notifyDataSetChanged();
+			mLoadingCircle.setVisibility(View.GONE);
+		}
+	};
+
+	private Response.Listener<JSONArray> mReloadNewsListener = new Response.Listener<JSONArray>() {
+		@Override
+		public void onResponse(JSONArray response) {
+			mNewsList.initFromJsonArray(response);
+			mAdapter.notifyDataSetChanged();
+			mListView.onRefreshComplete();
+		}
+	};
+
+	private Response.ErrorListener mResponseErrorListener = new Response.ErrorListener() {
+		@Override
+		public void onErrorResponse(VolleyError error) {
+			mLoadingCircle.setVisibility(View.GONE);
+			showError("エラーが発生しました");
+		}
+	};
+
+	private Response.ErrorListener mAddResponseErrorListener = new Response.ErrorListener() {
+		@Override
+		public void onErrorResponse(VolleyError error) {
+			mIsAddingFlag = false;
+		}
+	};
 
 	@Override
 	public void onPause() {
@@ -149,6 +283,16 @@ public class NewsTabFragment extends Fragment {
 	private int getNewsCaterogyId() {
 		Bundle args = getArguments();
 		return args.getInt(ARG_CATEGORY_ID);
+	}
+
+	private void logEventViewArticle(int categoryId, int articleId) {
+		Tracker t = ((MyApplication) getActivity().getApplication())
+				.getTracker(TrackerName.APP_TRACKER);
+		// Build and send an Event.
+		t.send(new HitBuilders.EventBuilder().setCategory("VIEW_ARTICLE")
+				.setAction("VIEW_ARTICLE").setLabel("CATEGORY_ID")
+				.setValue(categoryId).setLabel("ARTICLE_ID")
+				.setValue(articleId).build());
 	}
 
 	private class NewsListAdapter extends BaseAdapter {
@@ -175,48 +319,28 @@ public class NewsTabFragment extends Fragment {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			News news = (News) getItem(position);
-			NewsListRowViewBuilderBase listRowViewBuilder = new NormalListRowViewBilder(
-					R.layout.list_news, parent);
+			NewsListRowViewBuilderBase listRowViewBuilder;
+			if (position == 0) {
+				listRowViewBuilder = new TopListRowViewBilder(parent);
+			} else {
+				listRowViewBuilder = new NormalListRowViewBilder(parent);
+			}
+
 			return listRowViewBuilder.getView(news);
+		}
+	}
+
+	class TopListRowViewBilder extends NewsListRowViewBuilderBase {
+
+		public TopListRowViewBilder(ViewGroup parent) {
+			super(R.layout.list_news_top, parent);
 		}
 	}
 
 	class NormalListRowViewBilder extends NewsListRowViewBuilderBase {
 
-		public NormalListRowViewBilder(int layoutId, ViewGroup parent) {
-			super(layoutId, parent);
-		}
-
-		@Override
-		public void setTitle(News news) {
-			mTitleView.setText(news.getTitle());
-		}
-
-		@Override
-		public void setSrc(News news) {
-			if (!news.hasVia()) {
-				mSrcView.setVisibility(View.GONE);
-				return;
-			}
-			mSrcView.setVisibility(View.VISIBLE);
-			mSrcView.setText(news.getVia());
-		}
-
-		@Override
-		public void setThumnailView(News news) {
-
-			if (!news.hasImage()) {
-				mThumnailArea.setVisibility(View.GONE);
-				mThumnailView.setVisibility(View.GONE);
-				mThumnailProgressBar.setVisibility(View.GONE);
-				return;
-			}
-
-			mThumnailArea.setVisibility(View.VISIBLE);
-
-			ImageListener listener = MyImageLoader.getImageListener(
-					mThumnailView, mThumnailProgressBar);
-			mImageLoader.get(news.getImageUrl(), listener);
+		public NormalListRowViewBilder(ViewGroup parent) {
+			super(R.layout.list_news_normal, parent);
 		}
 	}
 
@@ -230,23 +354,12 @@ public class NewsTabFragment extends Fragment {
 		View mRootView;
 		ImageLoader mImageLoader = new ImageLoader(MyApplication.getInstance()
 				.getRequestQueue(), new MyImageCache());
-		TextView mTitleView;
-		TextView mSrcView;
-		ImageView mThumnailView;
-		ProgressBar mThumnailProgressBar;
-		ViewGroup mThumnailArea;
 
 		public NewsListRowViewBuilderBase(int layoutId, ViewGroup parent) {
 			LayoutInflater inflater = (LayoutInflater) getActivity()
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			mRootView = inflater.inflate(R.layout.list_news, parent, false);
-			mTitleView = (TextView) mRootView.findViewById(R.id.title);
-			mSrcView = (TextView) mRootView.findViewById(R.id.src);
-			mThumnailView = (ImageView) mRootView.findViewById(R.id.thumnail);
-			mThumnailProgressBar = (ProgressBar) mRootView
-					.findViewById(R.id.progress_bar);
-			mThumnailArea = (ViewGroup) mRootView
-					.findViewById(R.id.thumnail_area); 
+			mRootView = inflater.inflate(layoutId, parent, false);
+
 		}
 
 		public View getView(News news) {
@@ -256,10 +369,41 @@ public class NewsTabFragment extends Fragment {
 			return mRootView;
 		}
 
-		public abstract void setTitle(News news);
+		protected void setTitle(News news) {
+			TextView titleView = (TextView) mRootView.findViewById(R.id.title);
+			titleView.setText(news.getTitle());
+		}
 
-		public abstract void setSrc(News news);
+		protected void setSrc(News news) {
+			TextView srcView = (TextView) mRootView.findViewById(R.id.src);
+			if (!news.hasVia()) {
+				srcView.setVisibility(View.GONE);
+				return;
+			}
+			srcView.setVisibility(View.VISIBLE);
+			srcView.setText(news.getVia());
+		}
 
-		public abstract void setThumnailView(News news);
+		protected void setThumnailView(News news) {
+			ImageView thumnailView = (ImageView) mRootView
+					.findViewById(R.id.thumnail);
+			ProgressBar thumnailProgressBar = (ProgressBar) mRootView
+					.findViewById(R.id.progress_bar);
+			ViewGroup thumnailArea = (ViewGroup) mRootView
+					.findViewById(R.id.thumnail_area);
+
+			if (!news.hasImage()) {
+				thumnailArea.setVisibility(View.GONE);
+				thumnailView.setVisibility(View.GONE);
+				thumnailProgressBar.setVisibility(View.GONE);
+				return;
+			}
+
+			thumnailArea.setVisibility(View.VISIBLE);
+
+			ImageListener listener = MyImageLoader.getImageListener(
+					thumnailView, thumnailProgressBar);
+			mImageLoader.get(news.getImageUrl(), listener);
+		}
 	}
 }

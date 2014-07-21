@@ -19,6 +19,17 @@
         <item name="android:actionBarTabBarStyle">@style/customTabBar</item>
     </style>
 
+    <style name="slideAnim" parent="AppTheme">
+        <item name="android:windowAnimationStyle">@style/Animation.Activity</item>
+    </style>
+
+    <style name="Animation.Activity" parent="android:Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/act_open_enter_anim</item>
+        <item name="android:activityOpenExitAnimation">@anim/act_open_exit_anim</item>
+        <item name="android:activityCloseExitAnimation">@anim/act_close_exit_anim</item>
+        <item name="android:activityCloseEnterAnimation">@anim/act_close_enter_anim</item>
+    </style>
+
     <!-- action bar -->
     <style name="actionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
 
@@ -37,7 +48,7 @@
 
     <style name="customTabBar" parent="@android:style/Widget.Holo.ActionBar.TabBar">
         <item name="android:showDividers">middle</item>
-         <item name="android:divider">@drawable/action_bar_tab_divider</item>
+        <item name="android:divider">@drawable/action_bar_tab_divider</item>
     </style>
 
     <style name="titleTextStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">

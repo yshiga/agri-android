@@ -7,8 +7,10 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebSettings.LayoutAlgorithm;
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.activity.base.BaseActivity;
 import jp.co.smart_agri.news.view.MyLoadingProgressBar;
@@ -28,8 +30,17 @@ public class NewsWebViewActivity extends BaseActivity {
 
 	private void setupWebView() {
 		mWebView = (WebView) findViewById(R.id.webView);
-		mWebView.getSettings().setJavaScriptEnabled(true);
-		mWebView.getSettings().setBuiltInZoomControls(true);
+		
+		WebSettings settings = mWebView.getSettings();
+		settings.setJavaScriptEnabled(true);
+		settings.setBuiltInZoomControls(true);
+		
+		settings.setLoadWithOverviewMode(true);
+		settings.setUseWideViewPort(true);
+		settings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+		settings.setSupportZoom(true); 
+
+		mWebView.setInitialScale(1);
 		mWebView.setWebChromeClient(new WebChromeClient() {
 			public void onProgressChanged(WebView view, int progress) {
 				mProgressBar.setProgress(progress);
