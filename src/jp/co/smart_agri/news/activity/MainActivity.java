@@ -3,17 +3,24 @@ package jp.co.smart_agri.news.activity;
 import com.crittercism.app.Crittercism;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
+
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.application.MyApplication;
 import jp.co.smart_agri.news.application.MyApplication.TrackerName;
 import jp.co.smart_agri.news.config.AppConst;
 import jp.co.smart_agri.news.fragment.NewsTabFragment;
+import jp.co.smart_agri.news.lib.AlarmManagerUtils;
+import jp.co.smart_agri.news.lib.AppSettings;
 import jp.co.smart_agri.news.lib.AppUtils;
 import jp.co.smart_agri.news.lib.BackBtnFinishConfirmer;
+import jp.co.smart_agri.news.lib.MyParse;
+import jp.co.smart_agri.news.lib.NotificationUtils;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.app.ActionBar;
+import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.ActionBar.Tab;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +51,12 @@ public class MainActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		if (new AppSettings(getApplicationContext()).isMorningAlarmOn()) {
+			AlarmManagerUtils.setMoriningAlarm(getApplicationContext());
+		}
+
+		// parseの設定で落ちるときがあるので、一旦Parseを切る
+		// MyParse.setupParsePush(getApplicationContext());
 		setupCrittercism();
 		setTitle(getResources().getString(R.string.app_name));
 

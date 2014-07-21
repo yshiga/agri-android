@@ -56,7 +56,6 @@ public class MyApplication extends Application {
 
 		// initialize the singleton
 		sInstance = this;
-		MyParse.setupParsePush(getApplicationContext());
 	}
 
 	/**
