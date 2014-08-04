@@ -81,12 +81,12 @@ public class NewsWebViewActivity extends BaseActivity {
         intent.setType("text/plain");
         
         String subject = getNewsTitleFromIntent();
-        int subjectMaxLength = 30;
+        int subjectMaxLength = 40;
         if(subject.length() > subjectMaxLength) {
         	subject = subject.substring(0, subjectMaxLength);
         }
         
-        String text = subject + " " + getNewsUrlFromIntent() + " \nby 田舎暮らしニュース(https://play.google.com/store/apps/details?id=jp.co.smart_agri.news)";
+        String text = subject + " " + getNewsUrlFromIntent() + " \nby 田舎暮らしニュース(https://play.google.com/store/apps/details?id=jp.co.smart_agri.news&referrer=utm_source%3Dtwitter%26utm_medium%3Dapp)";
 
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         intent.putExtra(Intent.EXTRA_TEXT, text);
