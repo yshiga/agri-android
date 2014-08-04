@@ -11,6 +11,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebSettings.LayoutAlgorithm;
+import android.widget.ShareActionProvider;
 import jp.co.smart_agri.news.R;
 import jp.co.smart_agri.news.activity.base.BaseActivity;
 import jp.co.smart_agri.news.view.MyLoadingProgressBar;
@@ -67,12 +68,33 @@ public class NewsWebViewActivity extends BaseActivity {
 		
 		setTitle(getNewsTitleFromIntent());
 	}
+	
+	ShareActionProvider mShareActionProvider;
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		return false;
-	}
+	    // Inflate menu resource file.
+	    getMenuInflater().inflate(R.menu.share, menu);
+	    MenuItem item = menu.findItem(R.id.share);
+	    mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+	    Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        
+        String subject = getNewsTitleFromIntent();
+        int subjectMaxLength = 30;
+        if(subject.length() > subjectMaxLength) {
+        	subject = subject.substring(0, subjectMaxLength);
+        }
+        
+        String text = subject + " " + getNewsUrlFromIntent() + " \nby 田舎暮らしニュース(https://play.google.com/store/apps/details?id=jp.co.smart_agri.news)";
 
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+	    mShareActionProvider.setShareIntent(intent);
+
+	    return true;
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
